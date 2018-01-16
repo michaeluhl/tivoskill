@@ -105,3 +105,7 @@ ENV/
 
 # Support info
 support/
+
+# ASK CLI
+.ask/
+skill.json
