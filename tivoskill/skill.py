@@ -81,14 +81,23 @@ class Tivo(lambdaskill.Skill):
 
     def do_resumeintent(self, request):
         self.__comm.publish({'type': 'request', 'cmd': 'remote_key', 'params': {'key': api.RemoteKey.play.name}})
+        result = self.__comm.get_message()
         return lambdaskill.Response.finish(output="Resuming")
 
     def do_advanceintent(self, request):
         self.__comm.publish({'type': 'request', 'cmd': 'remote_key', 'params': {'key': api.RemoteKey.advance.name}})
+        result = self.__comm.get_message()
         return lambdaskill.Response.finish(output="Advancing")
 
     def do_testintent(self, request):
         return lambdaskill.Response.finish(output="Test Response")
+
+    def do_channelchangeintent(self, request):
+        slots = request.get_slots()
+        params = {k: v for k, v in slots.items() if k in ['channel_number', 'channel_name']}
+        self.__comm.publish({'type': 'request', 'cmd': 'change_channel', 'params': params})
+        result = self.__comm.get_message()
+        return lambdaskill.Response.finish('Changed.')
 
 
 handler = Tivo.get_handler()
