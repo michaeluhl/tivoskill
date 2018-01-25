@@ -1,3 +1,4 @@
+import logging
 import os
 from queue import Queue
 from threading import Event
@@ -10,6 +11,9 @@ from pubnub.enums import PNOperationType, PNStatusCategory
 from pubnub.callbacks import SubscribeCallback
 from pubnub.pnconfiguration import PNConfiguration
 from pubnub.pubnub import PubNub
+
+
+logger = logging.getLogger('lambdaskill')
 
 
 class Communicator(SubscribeCallback):
@@ -72,29 +76,65 @@ class Tivo(lambdaskill.Skill):
 
 
     def on_launch_request(self, request):
-        return lambdaskill.Response.respond('Welcome to TiVo Talk')
+        return lambdaskill.Response.respond('Welcome to TiVo Control')
 
     def do_pauseintent(self, request):
+        logger.info('PauseIntent')
         self.__comm.publish({'type': 'request', 'cmd': 'remote_key', 'params': {'key': api.RemoteKey.pause.name}})
         result = self.__comm.get_message()
         return lambdaskill.Response.finish(output="Paused")
 
     def do_resumeintent(self, request):
+        logger.info('ResumeIntent')
         self.__comm.publish({'type': 'request', 'cmd': 'remote_key', 'params': {'key': api.RemoteKey.play.name}})
         result = self.__comm.get_message()
         return lambdaskill.Response.finish(output="Resuming")
 
     def do_advanceintent(self, request):
+        logger.info('AdvanceIntent')
         self.__comm.publish({'type': 'request', 'cmd': 'remote_key', 'params': {'key': api.RemoteKey.advance.name}})
         result = self.__comm.get_message()
-        return lambdaskill.Response.finish(output="Advancing")
+        return lambdaskill.Response.finish(output="")
 
-    def do_testintent(self, request):
-        return lambdaskill.Response.finish(output="Test Response")
+    def do_selectintent(self, request):
+        logger.info('SelectIntent')
+        self.__comm.publish({'type': 'request', 'cmd': 'remote_key', 'params': {'key': api.RemoteKey.select.name}})
+        result = self.__comm.get_message()
+        return lambdaskill.Response.finish(output="")
+
+    def do_liveintent(self, request):
+        logger.info('LiveIntent')
+        self.__comm.publish({'type': 'request', 'cmd': 'remote_key', 'params': {'key': api.RemoteKey.liveTv.name}})
+        result = self.__comm.get_message()
+        return lambdaskill.Response.finish(output="")
+
+    def do_lastchannelintent(self, request):
+        logger.info('LastChannelIntent')
+        self.__comm.publish({'type': 'request', 'cmd': 'remote_key', 'params': {'key': api.RemoteKey.enter.name}})
+        result = self.__comm.get_message()
+        return lambdaskill.Response.finish(output="")
+
+    def do_directionintent(self, request):
+        slots = request.get_slots()
+        direction = slots['direction']
+        logger.info('DirectionIntent, direction={}'.format(direction))
+        key = api.RemoteKey[direction]
+        self.__comm.publish({'type': 'request', 'cmd': 'remote_key', 'params': {'key': key.name}})
+        result = self.__comm.get_message()
+        return lambdaskill.Response.finish(output="")
+
+    def do_typedintent(self, request):
+        slots = request.get_slots()
+        typed_text = slots['words_to_type']
+        logger.info('TypedIntent, words_to_type="{}"'.format(typed_text))
+        self.__comm.publish({'type': 'request', 'cmd': 'remote_key', 'params': {'key': 'string', 'value': typed_text}})
+        result = self.__comm.get_message()
+        return lambdaskill.Response.finish(output="")
 
     def do_channelchangeintent(self, request):
         slots = request.get_slots()
         params = {k: v for k, v in slots.items() if k in ['channel_number', 'channel_name']}
+        logger.info('ChannelChangeIntent, params={}'.format(str(params)))
         self.__comm.publish({'type': 'request', 'cmd': 'change_channel', 'params': params})
         result = self.__comm.get_message()
         return lambdaskill.Response.finish('Changed.')
