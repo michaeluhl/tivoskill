@@ -14,6 +14,7 @@ from pubnub.pubnub import PubNub
 
 
 logger = logging.getLogger('lambdaskill')
+logger.setLevel(logging.INFO)
 
 
 class Communicator(SubscribeCallback):
