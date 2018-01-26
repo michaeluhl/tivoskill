@@ -48,7 +48,7 @@ st.add_values(['transcendental',
                "leaps shipbuilder patchier polygon restlessness racking tweeter's",
                "sorcerer's dissenting viscount's indigestible sibling Bolivian revivified compulsory's"])
 i = lm.add_intent('TypedIntent')
-i.samples.append('type {words_to_type}')
+i.samples.append('<type|input> {words_to_type}')
 i.add_slot(name='words_to_type', slot_type='TYPED_INPUT')
 i = lm.add_intent('ChannelChangeIntent')
 i.samples.append(Expandable('change <|channel |channels >to <|channel ><{channel_name}|{channel_number}>'))
